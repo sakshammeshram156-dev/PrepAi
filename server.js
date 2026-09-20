@@ -1,6 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
 
 dotenv.config()
 
@@ -242,6 +245,16 @@ Respond with ONLY valid JSON in exactly this shape:
 })
 
 app.get('/api/health', (req, res) => res.json({ ok: true }))
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const distPath = path.join(__dirname, 'dist')
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath))
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'))
+  })
+}
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`PrepAI server running on http://localhost:${PORT}`))
